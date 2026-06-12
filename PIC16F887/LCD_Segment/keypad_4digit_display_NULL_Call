@@ -1,0 +1,158 @@
+#pragma config FOSC = INTRC_NOCLKOUT// Oscillator Selection bits (INTOSCIO oscillator: I/O function on RA6/OSC2/CLKOUT pin, I/O function on RA7/OSC1/CLKIN)
+#pragma config WDTE = OFF       // Watchdog Timer Enable bit (WDT disabled and can be enabled by SWDTEN bit of the WDTCON register)
+#pragma config PWRTE = OFF       // Power-up Timer Enable bit (PWRT enabled)
+#pragma config MCLRE = OFF    // RE3/MCLR pin function select bit (RE3/MCLR pin function is MCLR)
+#pragma config CP = OFF         // Code Protection bit (Program memory code protection is disabled)
+#pragma config CPD = OFF        // Data Code Protection bit (Data memory code protection is disabled)
+#pragma config BOREN = OFF      // Brown Out Reset Selection bits (BOR disabled)
+#pragma config IESO = OFF        // Internal External Switchover bit (Internal/External Switchover mode is enabled)
+#pragma config FCMEN = OFF    // Fail-Safe Clock Monitor Enabled bit (Fail-Safe Clock Monitor is enabled)
+#pragma config LVP = OFF 
+#define _XTAL_FREQ 4000000
+#include <xc.h>
+void  disp_call(unsigned char*ptr,int c);
+void  disp_null(unsigned char*pttr,int c);
+unsigned char arr[6]={0x39,0xf7,0x37,0x3E,0x38};  //CANUL
+    unsigned int i,j;
+void main(void) {
+    
+    PORTA=0X00;
+    PORTC=0X00;
+    PORTD=0X00;
+    TRISC=TRISD=0X00;
+    TRISA=0X07;
+    ANSEL=ANSELH=0;
+   
+    while(1)
+    {
+         RA3=1;
+    RA4=RA5=RA6=0;
+    if(RA0==1)
+    {
+       i++;
+       while(RA0==1); // key debouncing
+    }
+    if(RA1==1)
+    {
+       i++;
+       while(RA1==1);
+    }
+    if(RA2==1)
+    {
+        i++;
+       while(RA2==1);
+    }
+       
+    RA4=1;
+    RA3=RA5=RA6=0;
+    if(RA0==1)
+    {
+        i++;
+       while(RA0==1);
+    }
+    if(RA1==1)
+    {
+        i++;
+       while(RA1==1);
+    }
+    if(RA2==1)
+    {
+       i++;
+       while(RA2==1);
+    }
+    
+    RA5=1;
+    RA4=RA3=RA6=0;
+    if(RA0==1)
+    {
+       i++;
+       while(RA0==1);
+    }
+    if(RA1==1)
+    {
+        i++;
+       while(RA1==1);
+    }
+    if(RA2==1)
+    {
+        i++;
+       while(RA2==1);
+    }
+    RA6=1;
+    RA4=RA3=RA5=0;
+    if(RA1==1)
+    {
+       i++;
+       while(RA1==1);
+    }
+    
+
+    RA6=1;
+    RA4=RA3=RA5=0;
+    if(RA0==1)
+    {
+    if(i==10)
+    disp_call(arr,255); 
+        
+    else
+    disp_null(arr,255);
+   
+}
+}
+}
+void disp_call(unsigned char *ptr,int c)
+{
+    while(c--)   // delay(1000)
+    {
+     PORTD=0X0f;
+         PORTC=*ptr;
+        PORTD=0X0E;
+        __delay_ms(10);
+        
+         PORTD=0X0f;
+         PORTC=*(ptr+1);
+         PORTD=0X0d;
+        __delay_ms(10);
+        
+         PORTD=0X0f;
+         PORTC=*(ptr+4);
+         PORTD=0X0b;
+        __delay_ms(10);
+        
+        PORTD=0X0f;
+         PORTC=*(ptr+4);
+        PORTD=0X07;
+        __delay_ms(10);
+}
+    PORTC=0x00;
+}
+
+
+void disp_null(unsigned char *pttr,int c)
+{
+    while(c--)
+    {
+        PORTD=0X0f;
+         PORTC=*(pttr+2);
+        PORTD=0X0E;
+        __delay_ms(10);
+        
+         PORTD=0X0f;
+         PORTC=*(pttr+3);
+         PORTD=0X0d;
+        __delay_ms(10);
+        
+         PORTD=0X0f;
+         PORTC=*(pttr+4);
+         PORTD=0X0b;
+        __delay_ms(10);
+        
+        PORTD=0X0f;
+         PORTC=*(pttr+4);
+        PORTD=0X07;
+        __delay_ms(10);
+   
+     
+}
+    PORTC=0x00;
+}
