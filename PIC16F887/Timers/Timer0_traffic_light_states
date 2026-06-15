@@ -1,0 +1,130 @@
+
+
+#pragma config FOSC = INTRC_NOCLKOUT
+#pragma config WDTE = OFF
+#pragma config PWRTE = ON
+#pragma config MCLRE = ON
+#pragma config CP = OFF
+#pragma config CPD = OFF
+#pragma config BOREN = OFF
+#pragma config IESO = ON
+#pragma config FCMEN = ON
+#pragma config LVP = OFF
+
+#pragma config BOR4V = BOR40V
+#pragma config WRT = OFF
+
+#include <xc.h>
+
+#define _XTAL_FREQ 4000000
+
+
+unsigned int count = 0;
+
+typedef enum
+{
+    WAIT_FOR_BUTTON,
+    RED_STATE,
+    YELLOW_STATE,
+    GREEN_STATE
+} TrafficState;
+
+TrafficState state = WAIT_FOR_BUTTON;
+void Timer0_Task(void)
+{
+    if(T0IF)
+    {
+        count++;
+
+        T0IF = 0;
+        TMR0 = 131;      
+    }
+}
+
+
+void Traffic_Task(void)
+{
+    switch(state)
+    {
+        case WAIT_FOR_BUTTON:  
+
+            if(RA0 == 1)
+            {
+                count = 0;
+
+                RC0 = 1;     
+                RC1 = 0;
+                RC2 = 0;
+
+                state = RED_STATE;
+            }
+
+            break;
+
+        case RED_STATE:
+
+            if(count >= 625)    
+            {
+                RC0 = 0;
+                RC1 = 1;         
+                RC2 = 0;
+
+                state = YELLOW_STATE;
+            }
+
+            break;
+
+        case YELLOW_STATE:
+
+            if(count >= 875)    
+            {
+                RC0 = 0;
+                RC1 = 0;
+                RC2 = 1;       
+
+                state = GREEN_STATE;
+            }
+
+            break;
+
+        case GREEN_STATE:
+
+            if(count >= 1250) 
+            {
+                RC0 = 0;
+                RC1 = 0;
+                RC2 = 0;        
+
+                count = 0;
+
+                state = WAIT_FOR_BUTTON;
+            }
+
+            break;
+    }
+}
+
+
+void main(void)
+{
+    PORTA = 0x00;
+    PORTC = 0x00;
+
+    ANSEL = 0x00;
+    ANSELH = 0x00;
+
+    TRISA = 0x01;      
+    TRISC = 0x00;      
+
+    OPTION_REG = 0x85; 
+
+    TMR0 = 131;
+    T0IF = 0;
+
+    while(1)
+    {
+        Timer0_Task();
+
+        Traffic_Task();
+    }
+}
