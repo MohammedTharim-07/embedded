@@ -1,0 +1,59 @@
+#include <xc.h>
+
+// CONFIG1
+#pragma config FOSC = INTRC_NOCLKOUT
+#pragma config WDTE = OFF
+#pragma config PWRTE = ON
+#pragma config MCLRE = ON
+#pragma config CP = OFF
+#pragma config CPD = OFF
+#pragma config BOREN = OFF
+#pragma config IESO = ON
+#pragma config FCMEN = ON
+#pragma config LVP = OFF
+
+// CONFIG2
+#pragma config BOR4V = BOR40V
+#pragma config WRT = OFF
+
+void delay(unsigned long int t)
+{
+    while(t--);
+}
+
+void main()
+{
+    int i, j;
+
+    unsigned char segment[] ={0xFC,0x60,0xDA,0xF2,0x66,0xB6,0xBE,0xE0,0xFE,0xF6};
+    ANSEL  = 0x00;
+    ANSELH = 0x00;
+
+    TRISD = 0x00;  
+    TRISC = 0x00;   
+
+    PORTD = 0x00;
+    PORTC = 0x00;
+
+    while(1)
+    {
+       for(i =100; i>0; i--)
+        {
+            for(j = 0; j <5; j++)   
+            {     
+               
+                RD0 = 0;
+                RD1 = 1;
+                PORTC = segment[i / 10];
+                delay(1000);
+               
+       
+                
+                RD0 = 1;
+                RD1 = 0;
+                PORTC = segment[i % 10];
+                delay(1000);
+            }
+        }
+    }
+    }
