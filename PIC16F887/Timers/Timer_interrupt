@@ -1,0 +1,67 @@
+#pragma config FOSC = INTRC_NOCLKOUT
+#pragma config WDTE = OFF
+#pragma config PWRTE = ON
+#pragma config MCLRE = ON
+#pragma config CP = OFF
+#pragma config CPD = OFF
+#pragma config BOREN = OFF
+#pragma config IESO = ON
+#pragma config FCMEN = ON
+#pragma config LVP = OFF
+#pragma config BOR4V = BOR40V
+#pragma config WRT = OFF
+
+#include <xc.h>
+
+int count;
+
+
+void __interrupt() ISR(void)
+{
+    if (T0IF == 1)
+    {
+        count++;
+        TMR0 = 131;
+        T0IF = 0;
+    }
+
+    if (count == 375)
+    {
+        RC0 = 1;
+        RC1 = RC2 = 0;
+    }
+    if (count == 750)
+    {
+        RC1 = 1;
+        RC0 = RC2 = 0;
+    }
+    if (count == 1125)
+    {
+        RC2 = 1;
+        RC0 = RC1 = 0;
+    }
+    if (count == 1250)
+    {
+        RC0 = 0;
+        count = 0;
+    }
+}
+
+void main(void)
+{
+    PORTC = 0x00;
+    ANSEL = ANSELH = 0x00;
+    TRISC = 0x00;
+
+    OPTION_REG = 0x85;   // internal clock, prescaler 1:64
+    TMR0 = 131;
+
+    T0IF = 0;            // clear flag before enabling
+    T0IE = 1;            // enable Timer0 interrupt
+    GIE  = 1;            // enable global interrupts
+
+    while (1)
+    {
+        
+    }
+}
