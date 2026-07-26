@@ -1,0 +1,180 @@
+
+//transmitter code below
+
+#pragma config FOSC = INTRC_NOCLKOUT
+#pragma config WDTE = OFF
+#pragma config PWRTE = ON
+#pragma config MCLRE = ON
+#pragma config CP = OFF
+#pragma config CPD = OFF
+#pragma config BOREN = OFF
+#pragma config IESO = ON
+#pragma config FCMEN = ON
+#pragma config LVP = OFF
+#pragma config BOR4V = BOR40V
+#pragma config WRT = OFF
+
+#include <xc.h>
+char str[]="Tahareem";
+char data1;
+
+void delay(unsigned int t)
+{
+    while(t--);
+}
+
+void enable()
+{
+    RE1=1;
+    delay(1000);
+    RE1=0;
+    delay(1000);
+}
+
+void lcd(char cmd,char data)
+{
+    RE0=cmd;
+    PORTD=data;
+    enable();
+}
+
+void transmit(char data)
+{
+    while(!TXIF);      
+    TXREG=data;
+}
+
+void receiver()
+{
+    while(!RCIF);      
+    data1=RCREG;
+}
+
+void uart_string(char *ptr)
+{
+    while(*ptr!='\0')
+    {
+        transmit(*ptr);    
+
+        receiver();         
+
+        lcd(1,data1);       
+
+        ptr++;
+    }
+}
+
+void main()
+{
+    PORTA=0;
+    PORTC=0;
+    PORTD=0;
+
+    TRISA=0x00;
+    TRISD=0x00;
+    TRISE=0x00;
+    
+    TRISC=0x80;       
+
+    ANSEL=0;
+    ANSELH=0;
+
+    SPBRG=25;
+    RCSTA=0x90;        
+    TXSTA=0x24;        
+
+    lcd(0,0x38);
+    lcd(0,0x0C);
+    lcd(0,0x01);
+    lcd(0,0x06);
+
+    uart_string(str);
+
+    while(1);
+    {
+        
+    }
+}
+
+
+
+//receiver below sama string transmiting to transmitter
+
+#pragma config FOSC = INTRC_NOCLKOUT
+#pragma config WDTE = OFF
+#pragma config PWRTE = ON
+#pragma config MCLRE = ON
+#pragma config CP = OFF
+#pragma config CPD = OFF
+#pragma config BOREN = OFF
+#pragma config IESO = ON
+#pragma config FCMEN = ON
+#pragma config LVP = OFF
+#pragma config BOR4V = BOR40V
+#pragma config WRT = OFF
+
+#include <xc.h>
+char data1;
+void delay(unsigned int t)
+{
+    while(t--);
+}
+
+void enable()
+{
+    RE1=1;
+    delay(1000);
+    RE1=0;
+    delay(1000);
+}
+
+void lcd(char cmd,char data)
+{
+    RE0=cmd;
+    PORTD=data;
+    enable();
+}
+
+void transmit(char data)
+{
+    while(!TXIF);
+    TXREG=data;
+}
+
+void receiver()
+{
+    while(!RCIF);
+    data1=RCREG;
+}
+
+void main()
+{
+    PORTC=0;
+    PORTD=0;
+
+    TRISC=0x80;
+    TRISD=0x00;
+    TRISE=0x00;
+
+    ANSEL=0;
+    ANSELH=0;
+
+    SPBRG=25;
+
+    RCSTA=0x90;
+    TXSTA=0x24;
+
+    lcd(0,0x38);
+    lcd(0,0x0C);
+    lcd(0,0x01);
+    lcd(0,0x06);
+
+    while(1)
+    {
+        receiver();         
+
+        lcd(1,data1);       
+
+        transmit(data1);   
+    }
+}
